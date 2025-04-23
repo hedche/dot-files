@@ -99,3 +99,34 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+
+alias nrc='nvim +104 /Users/monty/.zshrc'
+alias rcr='source /Users/monty/.zshrc'
+alias n='nvim'
+# Git
+alias gs='git status'
+alias gam='git commit -am'
+alias gp='git pull'
+# Docker
+alias dps='docker ps -a'
+alias dcu='docker-compose up -d'
+alias dcd='docker-compose down'
+# Networking
+alias ifp='curl ifconfig.io'
+
+# Neovim
+alias fg='nvim +"Telescope live_grep"'
+alias f='nvim +"Telescope find_files"'
+
+# K8s
+alias k=kubectl
+complete -o default -F __start_kubectl k
+
+alias dl='cd /Users/monty/Downloads'
+# MJA
+alias mja='cd /Users/monty/dv/mja'
+alias dv='cd /Users/monty/dv'
+alias sshk='cd /Users/monty/dv/ssh-keys'
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+[[ $commands[kubectl] ]] && source <(kubectl completion zsh)
