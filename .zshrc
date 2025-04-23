@@ -100,8 +100,8 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-alias nrc='nvim +104 /Users/monty/.zshrc'
-alias rcr='source /Users/monty/.zshrc'
+alias nrc='nvim +104 /Users/monty/dv/dot-files/.zshrc'
+alias rcr='cp /Users/monty/dv/dot-files/.zshrc /Users/monty/.zshrc && source /Users/monty/.zshrc'
 alias n='nvim'
 # Git
 alias gs='git status'
@@ -121,6 +121,9 @@ alias f='nvim +"Telescope find_files"'
 # K8s
 alias k=kubectl
 complete -o default -F __start_kubectl k
+
+# Talos
+alias t=talosctl
 
 alias dl='cd /Users/monty/Downloads'
 # MJA
