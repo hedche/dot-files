@@ -124,11 +124,14 @@ complete -o default -F __start_kubectl k
 
 # Talos
 alias t=talosctl
+source <(talosctl completion zsh)
 
-alias dl='cd /Users/monty/Downloads'
-# MJA
-alias mja='cd /Users/monty/dv/mja'
+# Navigation
 alias dv='cd /Users/monty/dv'
+alias mja='cd /Users/monty/dv/mja'
+alias shelf='cd /Users/monty/dv/shelf'
+alias dot='cd /Users/monty/dv/dot-files'
+alias dl='cd /Users/monty/Downloads'
 alias sshk='cd /Users/monty/dv/ssh-keys'
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
