@@ -125,8 +125,8 @@ alias k=kubectl
 complete -o default -F __start_kubectl k
 
 # Talos
-alias t=talosctl
-source <(talosctl completion zsh)
+#alias t=talosctl
+#source <(talosctl completion zsh)
 
 # Navigation
 alias dv='cd /Users/monty/dv'
