@@ -8,9 +8,6 @@ export PATH="$HOME/Library/Python/3.9/bin:/opt/homebrew/bin:$PATH:/opt/yt.sh"
 
 export PATH="$HOME/.local/bin:$PATH"
 
-export PATH="$HOME/dv/plex-server/plex:$PATH"
-
-
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
@@ -108,7 +105,7 @@ source $ZSH/oh-my-zsh.sh
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
 alias nrc='nvim +104 /Users/monty/dv/dot-files/.zshrc'
-alias rcr='cp /Users/monty/dv/dot-files/.zshrc /Users/monty/.zshrc && source /Users/monty/.zshrc'
+alias rcr='cp /Users/monty/dv/dot-files/.zshrc /Users/monty/.zshrc; source /Users/monty/.zshrc'
 alias n='nvim'
 # Git
 alias gs='git status'
@@ -140,6 +137,9 @@ alias shelf='cd /Users/monty/dv/shelf'
 alias dot='cd /Users/monty/dv/dot-files'
 alias dl='cd /Users/monty/Downloads'
 alias sshk='cd /Users/monty/dv/ssh-keys'
+
+# Custom Commands
+alias plex='/Users/monty/dv/plex-server/plex'
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 [[ $commands[kubectl] ]] && source <(kubectl completion zsh)
