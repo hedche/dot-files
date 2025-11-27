@@ -143,3 +143,6 @@ alias plex='/Users/monty/dv/plex-server/plex'
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 [[ $commands[kubectl] ]] && source <(kubectl completion zsh)
+
+# Added by Antigravity
+export PATH="/Users/monty/.antigravity/antigravity/bin:$PATH"
