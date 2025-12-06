@@ -30,6 +30,7 @@
   d = diff
   dc = diff --cached
   l = log --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit
-  ai = "!f() { \\\n  git diff --staged | \\\n  ollama run llama3.1:8b \"Write a concise, conventional git commit message for this diff:\" | \\\n  sed -n \"1p\" | \\\n  xargs -I {} git commit -m \"{}\"; \\\n}; f"
+	ai = "!f() { \\\nDIFF=\"$(git diff --staged | head -c 12000)\"; \\\nMSG=\"$(printf \"%s\" \"$DIFF\" | ollama run llama3.1:8b \"You are a senior software engineer. Write a short conventional git commit message (feat, fix, chore, refactor). No emojis. No markdown. Only the message.\")\"; \\\ngit commit -m \"$MSG\"; \\\n}; f"
+	a = git add .
 [pull]
 	rebase = true
