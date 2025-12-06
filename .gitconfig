@@ -30,5 +30,6 @@
   d = diff
   dc = diff --cached
   l = log --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit
+  ai = "!f() { \\\n  git diff --staged | \\\n  ollama run llama3.1:8b \"Write a concise, conventional git commit message for this diff:\" | \\\n  sed -n \"1p\" | \\\n  xargs -I {} git commit -m \"{}\"; \\\n}; f"
 [pull]
 	rebase = true
