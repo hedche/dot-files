@@ -104,13 +104,14 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-alias nrc='nvim +104 /Users/monty/dv/dot-files/.zshrc'
-alias rcr='cp /Users/monty/dv/dot-files/.zshrc /Users/monty/.zshrc; source /Users/monty/.zshrc'
+alias nrc='vim +104 $HOME/dv/dot-files/.zshrc'
+alias rcr='cp -f $HOME/dv/dot-files/.zshrc /Users/monty/.zshrc && source /Users/monty/.zshrc'
 alias n='nvim'
 # Git
 alias gs='git status'
 alias gam='git commit -am'
 alias gp='git pull'
+alias ggp='git add . && git commit -m "$1" && git push'
 # Docker
 alias dps='docker ps -a'
 alias dcu='docker-compose up -d'
