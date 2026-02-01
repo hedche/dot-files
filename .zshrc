@@ -104,8 +104,9 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-alias nrc='vim +104 $HOME/dv/dot-files/.zshrc'
-alias rcr='cp -f $HOME/dv/dot-files/.zshrc /Users/monty/.zshrc && source /Users/monty/.zshrc'
+alias vrc='vim +104 $HOME/dv/dot-files/.zshrc'
+alias vssh='vim $HOME/.ssh/config'
+alias rcr='cp -f $HOME/dv/dot-files/.zshrc /Users/monty/.zshrc ; source /Users/monty/.zshrc'
 alias n='nvim'
 # Git
 alias gs='git status'
