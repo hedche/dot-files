@@ -148,3 +148,4 @@ alias plex='/Users/monty/dv/plex-server/plex'
 
 # Added by Antigravity
 export PATH="/Users/monty/.antigravity/antigravity/bin:$PATH"
+eval "$(direnv hook zsh)"

@@ -18,6 +18,7 @@
   helper = osxkeychain
 [push]
   default = simple
+	autoSetupRemote = true
 [merge]
   tool = kdiff3
 [difftool]
