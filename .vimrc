@@ -40,7 +40,7 @@ set guioptions=aAace    " don't show scrollbar in MacVim
 " call pathogen#infect()  " use pathogen
 
 " clipboard
-set clipboard=unnamed   " allow yy, etc. to interact with OS X clipboard
+set clipboard=          " keep normal yanks/deletes inside Vim; use "+ explicitly for OS X clipboard
 
 " shortcuts
 map <F2> :NERDTreeToggle<CR>
