@@ -78,6 +78,16 @@ plugins=(git)
 
 source $ZSH/oh-my-zsh.sh
 
+# Make Ctrl+W behave like bash/readline: delete back to whitespace
+# even when the word contains punctuation.
+backward-kill-space-word() {
+  local WORDCHARS=$'!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'
+  zle backward-kill-word
+}
+zle -N backward-kill-space-word
+bindkey -M emacs '^W' backward-kill-space-word
+bindkey -M viins '^W' backward-kill-space-word
+
 # User configuration
 
 # export MANPATH="/usr/local/man:$MANPATH"
