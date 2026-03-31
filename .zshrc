@@ -153,9 +153,274 @@ alias sshk='cd /Users/monty/dv/ssh-keys'
 # Custom Commands
 alias plex='/Users/monty/dv/plex-server/plex'
 
+# Markdown preview
+unalias md 2>/dev/null
+
+md() {
+  emulate -L zsh
+
+  if [[ $# -ne 1 ]]; then
+    printf 'usage: md <file.md>\n' >&2
+    return 1
+  fi
+
+  local preview_dir
+  preview_dir="$(
+    python3 - "$1" <<'PY'
+import hashlib
+import html
+import json
+import os
+import shutil
+import sys
+import tempfile
+from pathlib import Path
+from urllib.parse import quote
+
+arg = sys.argv[1]
+source_arg = Path(arg).expanduser()
+
+try:
+    source = source_arg.resolve(strict=True)
+except FileNotFoundError:
+    print(f"md: file not found: {arg}", file=sys.stderr)
+    raise SystemExit(1)
+except OSError as exc:
+    print(f"md: unable to resolve path: {arg}: {exc}", file=sys.stderr)
+    raise SystemExit(1)
+
+if not source.is_file():
+    print(f"md: not a file: {source}", file=sys.stderr)
+    raise SystemExit(1)
+
+if source.suffix.lower() not in {".md", ".markdown"}:
+    print(f"md: expected a .md or .markdown file: {source}", file=sys.stderr)
+    raise SystemExit(1)
+
+preview_dir = Path(tempfile.gettempdir()) / f"md-preview-{hashlib.sha1(str(source).encode('utf-8')).hexdigest()[:12]}"
+preview_dir.mkdir(parents=True, exist_ok=True)
+
+source_link = preview_dir / "_source"
+
+if source_link.exists() or source_link.is_symlink():
+    source_link_target = None
+    if source_link.is_symlink():
+        try:
+            source_link_target = source_link.resolve(strict=True)
+        except OSError:
+            source_link.unlink()
+    if source_link.exists() or source_link.is_symlink():
+        if source_link_target != source.parent.resolve():
+            if source_link.is_dir() and not source_link.is_symlink():
+                shutil.rmtree(source_link)
+            else:
+                source_link.unlink()
+
+if not source_link.exists():
+    source_link.symlink_to(source.parent, target_is_directory=True)
+
+preview_path = preview_dir / "index.html"
+preview_title = f"{source.name} — Markdown Preview"
+markdown_path = f"_source/{quote(source.name)}"
+
+document = f"""<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<base href="./_source/">
+<title>{html.escape(preview_title)}</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5.9.0/github-markdown.css">
+<style>
+  :root {{
+    color-scheme: light dark;
+  }}
+  body {{
+    margin: 0;
+  }}
+  .markdown-body {{
+    box-sizing: border-box;
+    min-width: 200px;
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 45px;
+  }}
+  @media (max-width: 767px) {{
+    .markdown-body {{
+      padding: 15px;
+    }}
+  }}
+  @media (prefers-color-scheme: dark) {{
+    body {{
+      background-color: #0d1117;
+    }}
+  }}
+  pre.fallback {{
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }}
+</style>
+</head>
+<body>
+<article id="content" class="markdown-body">
+  <pre id="fallback" class="fallback"></pre>
+</article>
+<script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.3.3/dist/purify.min.js"></script>
+<script>
+  const markdownPath = new URL({json.dumps(markdown_path)}, window.location.href).toString();
+  const previewTitle = {json.dumps(preview_title)};
+  const content = document.getElementById('content');
+  const fallback = document.getElementById('fallback');
+  let previousMarkdown = null;
+
+  function renderMarkdown(markdownText) {{
+    fallback.textContent = markdownText;
+
+    if (window.marked && window.DOMPurify) {{
+      const cleanedInput = markdownText.replace(/^[\\u200B\\u200C\\u200D\\u200E\\u200F\\uFEFF]/, '');
+      const renderedHtml = window.marked.parse(cleanedInput);
+      content.innerHTML = window.DOMPurify.sanitize(renderedHtml, {{USE_PROFILES: {{html: true}}}});
+    }} else {{
+      content.innerHTML = '';
+      content.appendChild(fallback);
+    }}
+
+    document.title = previewTitle;
+  }}
+
+  async function refreshMarkdown() {{
+    try {{
+      const response = await fetch(`${{markdownPath}}?t=${{Date.now()}}`, {{cache: 'no-store'}});
+      if (!response.ok) {{
+        throw new Error(`HTTP ${{response.status}}`);
+      }}
+
+      const markdownText = await response.text();
+      if (markdownText !== previousMarkdown) {{
+        previousMarkdown = markdownText;
+        renderMarkdown(markdownText);
+      }}
+    }} catch (error) {{
+      if (previousMarkdown === null) {{
+        fallback.textContent = `Unable to load preview source.\\n\\n${{error.message}}`;
+      }}
+    }}
+  }}
+
+  refreshMarkdown();
+  setInterval(refreshMarkdown, 1000);
+</script>
+</body>
+</html>
+"""
+
+preview_path.write_text(document, encoding="utf-8")
+print(preview_dir)
+PY
+  )" || return 1
+
+  local pid_file
+  local port_file
+  local pid
+  local port
+  local ready
+  local attempt
+
+  pid_file="$preview_dir/server.pid"
+  port_file="$preview_dir/server.port"
+
+  if [[ -f "$pid_file" && -f "$port_file" ]]; then
+    pid="$(<"$pid_file")"
+    port="$(<"$port_file")"
+
+    if [[ -z "$pid" || -z "$port" ]]; then
+      rm -f "$pid_file" "$port_file"
+      pid=""
+      port=""
+    elif ! kill -0 "$pid" 2>/dev/null; then
+      rm -f "$pid_file" "$port_file"
+      pid=""
+      port=""
+    elif ! python3 - "$port" <<'PY'
+import sys
+import urllib.request
+
+url = f"http://127.0.0.1:{sys.argv[1]}/"
+
+try:
+    with urllib.request.urlopen(url, timeout=0.5) as response:
+        raise SystemExit(0 if response.status == 200 else 1)
+except Exception:
+    raise SystemExit(1)
+PY
+    then
+      rm -f "$pid_file" "$port_file"
+      pid=""
+      port=""
+    fi
+  fi
+
+  if [[ -z "$port" ]]; then
+    port="$(
+      python3 - <<'PY'
+import socket
+
+with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+    sock.bind(("127.0.0.1", 0))
+    print(sock.getsockname()[1])
+PY
+    )" || return 1
+
+    nohup python3 -m http.server "$port" --bind 127.0.0.1 --directory "$preview_dir" >/dev/null 2>&1 &
+    pid="$!"
+    printf '%s\n' "$pid" > "$pid_file"
+    printf '%s\n' "$port" > "$port_file"
+    disown "$pid" 2>/dev/null || true
+
+    ready=0
+    for attempt in {1..20}; do
+      if python3 - "$port" <<'PY'
+import sys
+import urllib.request
+
+url = f"http://127.0.0.1:{sys.argv[1]}/"
+
+try:
+    with urllib.request.urlopen(url, timeout=0.5) as response:
+        raise SystemExit(0 if response.status == 200 else 1)
+except Exception:
+    raise SystemExit(1)
+PY
+      then
+        ready=1
+        break
+      fi
+
+      sleep 0.1
+    done
+
+    if [[ "$ready" -ne 1 ]]; then
+      printf 'md: preview server did not become ready\n' >&2
+      kill "$pid" 2>/dev/null
+      rm -f "$pid_file" "$port_file"
+      return 1
+    fi
+  fi
+
+  open "http://127.0.0.1:$port/"
+}
+
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 [[ $commands[kubectl] ]] && source <(kubectl completion zsh)
 
 # Added by Antigravity
 export PATH="/Users/monty/.antigravity/antigravity/bin:$PATH"
 eval "$(direnv hook zsh)"
+
+# bun completions
+[ -s "/Users/monty/.bun/_bun" ] && source "/Users/monty/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
