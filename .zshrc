@@ -153,6 +153,25 @@ alias sshk='cd /Users/monty/dv/ssh-keys'
 # Custom Commands
 alias plex='/Users/monty/dv/plex-server/plex'
 
+# YouTube download (480p)
+yt() {
+  if [[ $# -ne 1 ]]; then
+    echo "Usage: yt <youtube-url>" >&2
+    return 1
+  fi
+  mkdir -p "$HOME/Downloads/YT"
+  /opt/homebrew/bin/yt-dlp -f "best[height<=720]/best[height<=480]/best" -o "$HOME/Downloads/YT/%(title)s.%(ext)s" "$1"
+}
+
+# Dailymotion download (720p -> 480p -> 360p)
+dm() {
+  if [[ $# -ne 1 ]]; then
+    echo "Usage: dm <dailymotion-url>" >&2
+    return 1
+  fi
+  /opt/homebrew/bin/yt-dlp --no-update -f "bv*[height=720]+ba/b[height=720]/bv*[height=480]+ba/b[height=480]/bv*[height=360]+ba/b[height=360]" -o "$HOME/Downloads/%(title)s.%(ext)s" "$1"
+}
+
 # Markdown preview
 unalias md 2>/dev/null
 
