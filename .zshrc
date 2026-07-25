@@ -8,6 +8,17 @@ export PATH="$HOME/Library/Python/3.9/bin:/opt/homebrew/bin:$PATH:/opt/yt.sh"
 
 export PATH="$HOME/.local/bin:$PATH"
 
+# Docker Desktop CLI (docker, kubectl, credential helpers).
+# Docker Desktop only symlinks these into /usr/local/bin when it is granted
+# privileged access, which a Homebrew cask install usually skips. Prefer the
+# user-local dir it has used since 4.18, then fall back to the app bundle.
+for _docker_bin in "$HOME/.docker/bin" "/Applications/Docker.app/Contents/Resources/bin"; do
+  if [[ -d $_docker_bin && :$PATH: != *:$_docker_bin:* ]]; then
+    export PATH="$PATH:$_docker_bin"
+  fi
+done
+unset _docker_bin
+
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
@@ -125,8 +136,8 @@ alias gp='git pull'
 alias ggp='git add . && git commit -m "$1" && git push'
 # Docker
 alias dps='docker ps -a'
-alias dcu='docker-compose up -d'
-alias dcd='docker-compose down'
+alias dcu='docker compose up -d'
+alias dcd='docker compose down'
 # Networking
 alias ifp='curl ifconfig.io'
 
