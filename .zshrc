@@ -136,8 +136,27 @@ alias gp='git pull'
 alias ggp='git add . && git commit -m "$1" && git push'
 # Docker
 alias dps='docker ps -a'
-alias dcu='docker compose up -d'
-alias dcd='docker compose down'
+
+# Compose wrapper: prefers the v2 CLI plugin, falls back to a standalone
+# docker-compose binary on hosts that still have v1. Detection is cached for
+# the life of the shell so it costs one `docker compose version` at most.
+dc() {
+  if [[ -z $_DC_COMPOSE_CMD ]]; then
+    if docker compose version >/dev/null 2>&1; then
+      _DC_COMPOSE_CMD='docker compose'
+    elif command -v docker-compose >/dev/null 2>&1; then
+      _DC_COMPOSE_CMD='docker-compose'
+    else
+      printf "dc: neither 'docker compose' nor 'docker-compose' is available\n" >&2
+      return 1
+    fi
+  fi
+
+  ${=_DC_COMPOSE_CMD} "$@"
+}
+
+alias dcu='dc up -d'
+alias dcd='dc down'
 # Networking
 alias ifp='curl ifconfig.io'
 
