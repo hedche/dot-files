@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Claude Code SessionStart hook. Records which Claude session is running in
-# which tmux pane, so resurrect can offer to resume it after a restart.
+# which tmux pane, so it can be resumed there after a restart. A fresh record
+# is also how claude-resume-queue.sh knows a resumed session is up.
 #
 # Registered in ~/.claude/settings.json by mac-dev-playbook tasks/tmux.yml.
 # Reads the hook payload as JSON on stdin.

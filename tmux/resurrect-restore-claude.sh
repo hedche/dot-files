@@ -1,41 +1,20 @@
 #!/usr/bin/env bash
 # tmux-resurrect @resurrect-hook-post-restore-all
 #
-# For each Claude conversation that was running when the environment was saved,
-# type `claude --resume <id>` into the pane it belonged to.
+# Hands the Claude conversations that were running at the last save to
+# claude-resume-queue.sh, which resumes them into their panes a few at a time.
+# See that script for the pacing, and ~/Library/Logs/claude-resume.log for
+# progress.
 #
-# The command is typed but NOT executed -- no Enter is sent. After a reboot you
-# might have a dozen of these; launching them all unprompted would start a dozen
-# Claude processes at once. You press Enter on the ones you actually want.
+# Resurrect runs this hook synchronously, so the queue is started detached. All
+# of its descriptors are redirected: an inherited stdout would keep tmux's
+# run-shell waiting until the last session was up.
 
 set -uo pipefail
 
-resurrect_dir="$(tmux show-option -gqv @resurrect-dir)"
-[ -n "$resurrect_dir" ] || resurrect_dir="$HOME/.tmux/resurrect"
-resurrect_dir="${resurrect_dir/#\~/$HOME}"
+log_file="${CLAUDE_RESUME_LOG:-$HOME/Library/Logs/claude-resume.log}"
+mkdir -p "$(dirname "$log_file")" || exit 0
 
-saved="$resurrect_dir/claude-sessions.txt"
-[ -f "$saved" ] || exit 0
-
-while IFS=$'\t' read -r sess win pane session_id cwd; do
-    [ -n "${session_id:-}" ] || continue
-    target="$sess:$win.$pane"
-
-    # The pane may not have come back (window closed before the last save, or a
-    # partial restore).
-    current_cmd="$(tmux display-message -p -t "$target" '#{pane_current_command}' 2>/dev/null)" || continue
-    [ -n "$current_cmd" ] || continue
-
-    # Only type into an idle shell. If something else is running in there,
-    # injecting keystrokes would go into that program's stdin.
-    case "$current_cmd" in
-        zsh|bash|sh|fish|dash|ksh) ;;
-        *) continue ;;
-    esac
-
-    # -l sends the string literally, so nothing in the UUID is interpreted as a
-    # tmux key name. No Enter: see header.
-    tmux send-keys -t "$target" -l "claude --resume $session_id"
-done < "$saved"
+nohup "$(dirname "$0")/claude-resume-queue.sh" >> "$log_file" 2>&1 < /dev/null &
 
 exit 0
