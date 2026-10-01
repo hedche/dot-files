@@ -126,7 +126,17 @@ bindkey -M viins '^W' backward-kill-space-word
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
 alias vrc='vim +104 $HOME/dv/dot-files/.zshrc'
-alias vssh='vim $HOME/.ssh/config'
+vssh() {
+  vim "$HOME/.ssh/config"
+  local dir="$HOME/Library/Mobile Documents/com~apple~CloudDocs/Administrator ⚙️/ssh-config-backups"
+  mkdir -p "$dir"
+  local latest
+  latest=$(ls -t "$dir"/config.* 2>/dev/null | head -1)
+  if [[ -z "$latest" ]] || ! cmp -s "$HOME/.ssh/config" "$latest"; then
+    cp "$HOME/.ssh/config" "$dir/config.$(date +%Y%m%d-%H%M%S)"
+    echo "ssh config backed up to iCloud/Administrator"
+  fi
+}
 alias rcr='cp -f $HOME/dv/dot-files/.zshrc /Users/monty/.zshrc ; source /Users/monty/.zshrc'
 alias n='nvim'
 # Git
