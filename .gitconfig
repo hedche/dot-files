@@ -13,7 +13,9 @@
 [init]
   defaultBranch = master
 [web]
-  browser = arc
+  browser = dia
+[browser "dia"]
+  cmd = open -a Dia
 [credential]
   helper = osxkeychain
 [push]
